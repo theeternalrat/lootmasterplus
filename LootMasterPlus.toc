@@ -11,4 +11,5 @@ embeds.xml
 --Locale Translations
 Locales/Locales.xml
 
+--Addon logic
 LootMasterPlusCore.lua
