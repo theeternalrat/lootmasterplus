@@ -1,7 +1,8 @@
-LMP = LibStub("AceAddon-3.0"):NewAddon("LootMasterPlus", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0")
-
 --localization
 local L = LibStub("AceLocale-3.0"):GetLocale("LootMasterPlus", true)
+
+--init addon
+LMP = LibStub("AceAddon-3.0"):NewAddon(L.core.name, "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0")
 
 function LMP:OnInitialize()
     --called when addon is first loaded in-game
@@ -25,7 +26,7 @@ local options = {
     args = {
         msg = {
             type = 'input',
-            name = L["MyMessage"],
+            name = L.core.message,
             desc = 'The message for my addon',
             set = 'SetMyMessage',
             get = 'GetMyMessage'
@@ -34,7 +35,7 @@ local options = {
 }
 
 --setup profiles for options
-options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
+--options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
 
 --register the options table
 LibStub("AceConfig-3.0"):RegisterOptionsTable("LootMasterPlus", options, {"lmp", "lootmasterplus"})
@@ -49,8 +50,8 @@ function LMP:SetMyMessage(info, input)
 end
 
 --AceComm inter-addon comm
-LMP:RegisterComm("LMP$$")
-
 function LMP:OnCommReceived(prefix, message, dist, sender)
     --process the message
 end
+
+LMP:RegisterComm("LMP$$")
