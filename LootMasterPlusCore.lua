@@ -6,7 +6,7 @@ LMP = LibStub("AceAddon-3.0"):NewAddon(L.core.name, "AceConsole-3.0", "AceEvent-
 
 function LMP:OnInitialize()
     --called when addon is first loaded in-game
-    self.db = LibStub("AceDB-3.0"):New("LootMasterPlusDB")
+    self.db = LibStub("AceDB-3.0"):New(L.core.dbName)
     
     --TODO: profiles with default
     --options table for Ace3
@@ -15,13 +15,6 @@ function LMP:OnInitialize()
         handler = LMP,
         type = 'group',
         args = {
-            msg = {
-                type = 'input',
-                name = L.core.msg.name,
-                desc = L.core.msg.desc,
-                set = 'SetMyMessage',
-                get = 'GetMyMessage'
-            }
         }
     }
 
@@ -29,22 +22,33 @@ function LMP:OnInitialize()
     options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 
     --register the options table
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("LootMasterPlus", options, {"lmp", "lootmasterplus"})
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("LootMasterPlus", options)
     self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("LootMasterPlus", L.core.name)
+
+    --register chat commands
+    LMP:RegisterChatCommand("lmp", "ChatCommandHandler")
 
     --Basic UI
     local AceGUI = LibStub("AceGUI-3.0")
     self.mainFrame = AceGUI:Create("Frame")
     local frame = self.mainFrame
-    frame:SetTitle("Main Frame")
-    frame:SetStatusText("AceGUI-3.0 Example Frame")
+    frame:SetTitle("Loot Master Plus")
+    frame:SetStatusText(L.core.name .. " by Ryan Atkinson - Ecoshock US-Deathwing(H)")
     frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
-    frame:SetLayout("Flow")
+    frame:SetLayout("Fill")
 
-    local editbox = AceGUI:Create("EditBox")
-    editbox:SetLabel("Insert Text:")
-    editbox:SetWidth(200)
-    frame:AddChild(editbox)
+    --add our tabs into the main UI frame
+    local tabFrame = AceGUI:Create("TabGroup")
+    tabFrame:SetLayout("Flow")
+    tabFrame:SetTabs(L.core.tabs)
+    frame:AddChild(tabFrame)
+    tabFrame:SelectTab(L.core.tabs[1].value)
+    tabFrame:SetCallback("OnGroupSelected", TabGroupSelected)
+
+    --local editbox = AceGUI:Create("EditBox")
+    --editbox:SetLabel("Insert Text:")
+    --editbox:SetWidth(200)
+    --frame:AddChild(editbox)
 end
 
 function LMP:OnEnable()
@@ -55,13 +59,18 @@ function LMP:OnDisable()
     --called when addon is disabled
 end
 
---chat commands
-function LMP:GetMyMessage(info)
-    return myMessageVar
+--tab group selection
+function LMP:TabGroupSelected(group)
+    self:Print(group .. " selected")
 end
 
-function LMP:SetMyMessage(info, input)
-    myMessageVar = input
+--chat commands
+function LMP:ChatCommandHandler(input)
+    if not input or input:trim() == "" then
+        LibStub("AceConfigDialog-3.0"):Open("LootMasterPlus")
+    else
+        LibStub("AceConfigCmd-3.0").HandleCommand(LMP, "lmp", "LootMasterPlus", input)
+    end
 end
 
 --AceComm inter-addon comm
