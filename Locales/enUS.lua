@@ -13,5 +13,15 @@ L.core = {
             value = "optionsTab",
             text = "Options"
         }
-    }
+    },
+    lootStyleLabel = "Loot Style",
+    lootStyleOptions = {
+        epgp = "EPGP",
+        lm = "Loot Master",
+        epgplm = "EPGP/LM"
+    },
+    lootStyleOptionsEnum = {
+        "epgp", "lm", "epgplm"
+    },
+    lootMastersLabel = "Loot Masters"
 }
