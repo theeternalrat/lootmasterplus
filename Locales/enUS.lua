@@ -23,5 +23,22 @@ L.core = {
     lootStyleOptionsEnum = {
         "epgp", "lm", "epgplm"
     },
-    lootMastersLabel = "Loot Masters"
+    lootMastersLabel = "Loot Masters",
+}
+
+L.dev = {
+    tabs = {
+        {
+            value = "mainTab",
+            text = "Main Tab"
+        },
+        {
+            value = "optionsTab",
+            text = "Options"
+        },
+        {
+            value = "dev",
+            text = "Dev Options"
+        }
+    },
 }
