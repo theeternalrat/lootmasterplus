@@ -85,6 +85,7 @@ function LMP:OnInitialize()
     --editbox:SetLabel("Insert Text:")
     --editbox:SetWidth(200)
     --frame:AddChild(editbox)
+    --test
 
     self:Debug("Addon loaded successfully")
 end
