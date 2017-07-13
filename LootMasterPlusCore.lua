@@ -4,13 +4,14 @@ local L = LibStub("AceLocale-3.0"):GetLocale("LootMasterPlus", true)
 --init addon
 LMP = LibStub("AceAddon-3.0"):NewAddon(L.core.name, "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0")
 
---debug
-local debug = true;
-local Debug = true;
+--debug/dev variables
+LMP.debug = false
+LMP.verbose = false
+LMP.development = true --TODO: Switch off
 
 function LMP:Debug(msg, VerboseMode)
-    if(debug) then 
-        if (VerboseMode and Debug) then
+    if(self.debug) then 
+        if (VerboseMode and self.verbose) then
             self:Print("Verbose: " .. msg)
         else
             self:Print("Debug: " .. msg)
@@ -19,20 +20,40 @@ function LMP:Debug(msg, VerboseMode)
 end
 
 local function InitDefaultSettings()
-    LMP.db.profile.init = true;
+    LMP.db.profile.init = true
     LMP.db.profile.lootChoice = "lm"
     LMP.db.profile.lootMasters = UnitName("player")
     LMP.db.profile.epStart = 100
     LMP.db.profile.gpStart = 100
+    LMP.db.profile.debug = true --TODO: Change to false
+    LMP.db.profile.verbose = true
+end
+
+local function ResetAndInitDB()
+    LMP:Debug("Reset the database")
+    LMP.db:ResetDB()
+    LMP:Debug("Setting default values")
+    --init values
+    InitDefaultSettings()
 end
 
 function LMP:OnInitialize()
     --called when addon is first loaded in-game
     self.db = LibStub("AceDB-3.0"):New(L.core.dbName)
-    self.db:ResetDB()
+    self.debug = self.db.profile.debug
+    self.verbose = self.db.profile.verbose
+    self.development = true
+
+    self:Debug("Started loading addon", true)
+
+    if(self.development) then
+        self:Debug("Reset the database")
+        self.db:ResetDB() --TODO: Remove or do something
+    end
 
     --check for first init
     if(self.db.profile.init == nil) then
+        self:Debug("Setting default values")
         --init values
         InitDefaultSettings()
     end
@@ -157,6 +178,15 @@ local function TabGroupSelected(container, event, group)
         gpStartBox:SetCallback("OnTextChanged", SaveGPStart)
         gpStartBox:DisableButton(true)
         container:AddChild(gpStartBox)
+
+    elseif group == L.dev.tabs[3].value then
+        --add the dev console
+        local resetDBButton = AceGUI:Create("Button")
+        resetDBButton:SetText("Reset DB")
+        resetDBButton:SetCallback("OnClick", ResetAndInitDB)
+        container:AddChild(resetDBButton)
+
+
     end
     LMP:Debug("Finished creating tab", true)
 end
@@ -177,7 +207,7 @@ function LMP:OnCommReceived(prefix, message, dist, sender)
 end
 
 function LMP:MakeGUI()
-    self:Debug("Started making main frame - MakeGUI", true)
+    self:Debug("Started making main frame - MakeGUI")
     local AceGUI = LibStub("AceGUI-3.0")
     self.mainFrame = AceGUI:Create("Frame")
     local frame = self.mainFrame
@@ -189,12 +219,17 @@ function LMP:MakeGUI()
     --add our tabs into the main UI frame
     local tabFrame = AceGUI:Create("TabGroup")
     tabFrame:SetLayout("List")
-    tabFrame:SetTabs(L.core.tabs)
+
+    if(self.development) then
+        tabFrame:SetTabs(L.dev.tabs)
+    else
+        tabFrame:SetTabs(L.core.tabs)
+    end
     frame:AddChild(tabFrame)
     tabFrame:SelectTab(L.core.tabs[1].value)
     tabFrame:SetCallback("OnGroupSelected", TabGroupSelected)
 
-    self:Debug("Finished making main frame - MakeGUI", true)
+    self:Debug("Finished making main frame - MakeGUI")
 end
 
 LMP:RegisterComm("LMP$$")
