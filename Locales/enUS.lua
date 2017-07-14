@@ -24,6 +24,7 @@ L.core = {
         "epgp", "lm", "epgplm"
     },
     lootMastersLabel = "Loot Masters",
+    disenchantersLabel = "Disenchanters",
 }
 
 L.dev = {

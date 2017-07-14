@@ -2,4 +2,6 @@
   <Script file="Locales\enUS.lua" />
 
   <Script file="LootMasterPlusCore.lua" />
+  <Script file="LootMasterPlusFrameHelper.lua" />
+  <Script file="LootMasaterPlusDevHelper.lua" />
 </Ui>
