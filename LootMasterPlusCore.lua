@@ -9,7 +9,12 @@ LMP.debug = false
 LMP.verbose = false
 LMP.development = true --TODO: Switch off
 
+--Operational variables
+LMP.inRaid = false
+
 function LMP:Debug(msg, VerboseMode)
+    --If only message supplied, then the message will only print out in Verbose Mode
+    --If message and true, will print out in Debug Mode
     if(self.debug) then 
         if (VerboseMode and self.verbose) then
             self:Print("Verbose: " .. msg)
@@ -39,12 +44,17 @@ local function ResetAndInitDB()
     InitDefaultSettings()
 end
 
+local function ToggleVerbose()
+    LMP.verbose = not LMP.verbose
+    LMP:Debug("Verbose: " .. tostring(LMP.verbose))
+end
+
 function LMP:OnInitialize()
     --called when addon is first loaded in-game
     self.db = LibStub("AceDB-3.0"):New(L.core.dbName)
     self.debug = self.db.profile.debug
     self.verbose = self.db.profile.verbose
-    self.development = true
+    self.development = true --TODO: Set to false before release
 
     self:Debug("Started loading addon", true)
 
@@ -98,10 +108,16 @@ end
 
 function LMP:OnEnable()
     --called when addon is enabled
+
+    --Bind events
+    self:RegisterEvent("GROUP_ROSTER_CHANGED")
 end
 
 function LMP:OnDisable()
     --called when addon is disabled
+
+    --Unbind Events
+    self:UnregisterEvent("GROUP_ROSTER_CHANGED")
 end
 
 function LMP:CheckNum(value, valName)
@@ -154,6 +170,12 @@ end
 local function SaveLootMasters(value)
     LMP:Debug("Saving loot masters")
     LMP.db.profile.lootMasters = value:GetText()
+    --TODO: Handle cross realm support
+end
+
+local function ToggleTesting(value)
+    --Simulate a raid environment
+    LMP:Debug("Starting raid sim")
 end
 
 --tab group selection
@@ -207,14 +229,14 @@ local function TabGroupSelected(container, event, group)
 
         local epStartBox = AceGUI:Create("EditBox")
         epStartBox:SetText(LMP.db.profile.epStart)
-        epStartBox:SetLabel("EP Start")
+        epStartBox:SetLabel(L.core.epStart)
         epStartBox:SetCallback("OnTextChanged", SaveEPStart)
         epStartBox:DisableButton(true)
         epgpStartFrame:AddChild(epStartBox)
 
         local gpStartBox = AceGUI:Create("EditBox")
         gpStartBox:SetText(LMP.db.profile.gpStart)
-        gpStartBox:SetLabel("EP Start")
+        gpStartBox:SetLabel(L.core.gpStart)
         gpStartBox:SetCallback("OnTextChanged", SaveGPStart)
         gpStartBox:DisableButton(true)
         epgpStartFrame:AddChild(gpStartBox)
@@ -226,7 +248,7 @@ local function TabGroupSelected(container, event, group)
 
         local epAwardBox = AceGUI:Create("EditBox")
         epAwardBox:SetText(LMP.db.profile.epAward)
-        epAwardBox:SetLabel("EP Per Award")
+        epAwardBox:SetLabel(L.core.epAward)
         epAwardBox:SetCallback("OnTextChanged", SaveEPAward)
         epAwardBox:DisableButton(true)
         epAwardFrame:AddChild(epAwardBox)
@@ -248,8 +270,13 @@ local function TabGroupSelected(container, event, group)
 
         local toggleVerbose = AceGUI:Create("Button")
         toggleVerbose:SetText("Toggle Verbose")
-        toggleVerbose:SetCallback("OnClick", function() LMP.verbose = not LMP.verbose end)
+        toggleVerbose:SetCallback("OnClick", ToggleVerbose)
         container:AddChild(toggleVerbose)
+
+        local toggleTesting = AceGUI:Create("Button")
+        toggleTesting:SetText("Toggle Testing")
+        toggleTesting:SetCallback("OnClick", ToggleTesting)
+        container:AddChild(toggleTesting)
 
     end
 
@@ -279,7 +306,7 @@ function LMP:MakeGUI()
     local frame = self.mainFrame
     frame:SetAutoAdjustHeight(true)
     frame:SetTitle("Loot Master Plus")
-    frame:SetStatusText(L.core.name .. " by Ryan Atkinson - Ecoshock US-Deathwing(H)")
+    frame:SetStatusText(L.core.name .. " by Ryan Atkinson - Ecoshock US-Deathwing (H)")
     frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
     frame:SetLayout("Fill")
     frame:SetHeight(530)
@@ -302,4 +329,22 @@ function LMP:MakeGUI()
     self:Debug("Finished making main frame - MakeGUI")
 end
 
+--Events
+function LMP:GROUP_ROSTER_CHANGED()
+    self:Debug("Fired GROUP_ROSTER_CHANGED event")
+    isInRaid = IsInRaid()
+    self:Debug("isInRaid: " .. tostring(isInRaid))
+    if(isInRaid ~= false) then
+        --Turn functions off
+        LMP.isInRaid = false
+
+    elseif(LMP.isInRaid ~= false and isInRaid) then
+        --Turn functions on
+        LMP.isInRaid = true
+
+    end
+
+end
+
 LMP:RegisterComm("LMP$$")
+

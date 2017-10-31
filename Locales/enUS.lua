@@ -20,11 +20,14 @@ L.core = {
         lm = "Loot Master",
         epgplm = "EPGP/LM"
     },
-    lootStyleOptionsEnum = {
+    lootStyleOptionsEnum = { --this should be the same as the above lootStyleOptions values
         "epgp", "lm", "epgplm"
     },
     lootMastersLabel = "Loot Masters",
     disenchantersLabel = "Disenchanters",
+    epStart = "EP Start",
+    gpStart = "GP Start",
+    epAward = "EP Per Award",
 }
 
 L.dev = {
